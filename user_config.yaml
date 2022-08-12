@@ -1,0 +1,26 @@
+#eduroam
+#host:172.20.96.235
+#ibis
+#host:10.144.88.214
+#ADRZ
+#host:10.42.1.43
+#DFKI
+#host:172.16.100.220
+
+# websocket uri of kaldi/vosk server
+uri: "ws://localhost:2700/"
+# adaptation_state_infile="state"
+# adaptation_state_outfile="state"
+
+# Address of MQTT broker
+mqtt_address: localhost
+
+# Audio parameter
+channels: 1
+sample_rate: 44100
+#sample_rate: 16000
+asr_sample_rate: 16000
+#system default: default
+device: 5
+#device: pulse
+#device: plughw:1
