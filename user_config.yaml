@@ -8,7 +8,7 @@
 #host:172.16.100.220
 
 # websocket uri of kaldi/vosk server
-uri: "ws://localhost:2700/"
+uri: "ws://0.0.0.0:2700/"
 # adaptation_state_infile="state"
 # adaptation_state_outfile="state"
 
@@ -16,11 +16,13 @@ uri: "ws://localhost:2700/"
 mqtt_address: localhost
 
 # Audio parameter
-channels: 1
+channels: 2
+use_channel: 1
 sample_rate: 44100
 #sample_rate: 16000
-asr_sample_rate: 16000
+asr_sample_rate: 8000
 #system default: default
 device: 5
+#device: default
 #device: pulse
 #device: plughw:1

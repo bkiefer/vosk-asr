@@ -24,4 +24,4 @@ COPY startclient.sh /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
 EXPOSE 64738
-CMD ["/bin/sh", "-c", "startclient.sh"]
+CMD ["/bin/sh", "-c", "./startclient.sh"]
