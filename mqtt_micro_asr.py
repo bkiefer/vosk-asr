@@ -25,6 +25,17 @@ def int_or_str(text):
 def current_milli_time():
     return round(time.time() * 1000)
 
+def device_name_to_nr(dev):
+    if type(dev) is int:
+        return dev
+    # dev must be string
+    i = 0
+    for d in sd.query_devices():
+        if dev in d.get('name'):
+            return i
+        i += 1
+    return -1
+
 class VoskMicroServer():
     pid = "voskasr"
     audio_dir = "audio/"
@@ -196,13 +207,13 @@ class VoskMicroServer():
 
     async def run_micro(self):
         cb = lambda inp, frames, time, stat: self.callback(inp, frames, time, stat)
+        device = device_name_to_nr(self.config['device'])
         print("Connecting to audio input %s (%d, %d, %d)"
-              % (self.config['device'],
-                 self.sample_rate, self.channels, self.usedchannel))
+              % (device, self.sample_rate, self.channels, self.usedchannel))
 
         with sd.RawInputStream(samplerate=self.sample_rate,
                                blocksize = 2048 * self.channels,
-                               device=self.config['device'], dtype='int16',
+                               device=device, dtype='int16',
                                channels=self.channels,
                                callback=cb) as device:
             with self.open_wave_file(self.wav_filename()) as self.wf:

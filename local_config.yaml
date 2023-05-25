@@ -22,14 +22,14 @@ mqtt_address: localhost
 # Sennheiser PC 8
 #channels: 1
 #use_channel: 0
-sample_rate: 44100
-device: 10
+#sample_rate: 44100
+#device: Sennheiser
 
 # ReSpeaker V2
-# channels: 6
-# use_channel: 0 # combo channel
-# sample_rate: 16000
-# device: 11 # may change
+channels: 6
+use_channel: 0 # combo channel
+sample_rate: 16000
+device: ReSpeaker
 
 asr_sample_rate: 8000
 #system default: default
