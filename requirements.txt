@@ -1,5 +1,5 @@
 pyyaml>=6.0
-resampy>=0.2.2
+resampy>=0.4.2
 numpy>=1.21
 sounddevice
 pyaudio

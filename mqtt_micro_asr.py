@@ -15,6 +15,10 @@ import numpy as np
 import json
 import paho.mqtt.client as mqtt
 
+MAX_RECONNECTS = 40
+RECONNECT_WAIT = 5  # SECONDS
+
+
 def int_or_str(text):
     """Helper function for argument parsing."""
     try:
@@ -105,16 +109,19 @@ class VoskMicroServer():
 
         frame = np.frombuffer(audio, dtype=np.int16)
         if channels > 1:
+            # numpy slicing:
+            # take every i'th value: frame[start:stop:step]
             frame = frame[self.usedchannel::channels]
             # first attempt
             #chans = []
             #for i in range(0, channels - 1):
             #    chans.append(frame[i::channels])
-            # numpy slicing:
-            # take every i'th value: frame[start:stop:step]
             # channels on separate axes
             # why? we're only taking one channel anyway for ASR!
             #frame = np.stack(chans, axis=0)
+            # print(frame.shape)
+            #frame = frame[self.usedchannel]
+            # print(frame)
         #print(frame[:64])
         if sample_rate != self.asr_sample_rate:
             frame = resampy.resample(frame, sample_rate, self.asr_sample_rate)
@@ -185,25 +192,37 @@ class VoskMicroServer():
 
     async def run_loop(self):
         print("Opening ASR websocket %s" % (self.config['uri']))
-        async with websockets.connect(self.config['uri']) as websocket:
+        async for websocket in websockets.connect(self.config['uri']):
             #print("****************** Connected ******************")
-            await websocket.send('{ "config" : { "sample_rate" : %d } }'
-                                 % (self.asr_sample_rate))
-            while True:
-                data = await self.audio_queue.get()
-                self.writeframes(data)
-                #print(len(data))
+            reconnects = 0
+            try:
+                await websocket.send('{ "config" : { "sample_rate" : %d } }'
+                                     % (self.asr_sample_rate))
+                while True:
+                    data = await self.audio_queue.get()
+                    self.writeframes(data)
+                    #print(len(data))
 
-                data = self.resample(data, self.channels, self.sample_rate)
-                print('<', end='', flush=True)
-                await websocket.send(data)
-                print('>', end='', flush=True)
+                    data = self.resample(data, self.channels, self.sample_rate)
+                    print('<', end='', flush=True)
+                    await websocket.send(data)
+                    print('>', end='', flush=True)
+                    result = await websocket.recv()
+                    self.check_result(result)
+
+                await websocket.send('{"eof" : 1}')
                 result = await websocket.recv()
                 self.check_result(result)
 
-            await websocket.send('{"eof" : 1}')
-            result = await websocket.recv()
-            self.check_result(result)
+            except websockets.ConnectionClosed:
+                print('r', end='')
+                reconnects += 1
+                time.sleep(RECONNECT_WAIT)
+                if reconnects > MAX_RECONNECTS:
+                    print("MAX_RECONNECTS reached")
+                    break
+                else:
+                    continue
 
     async def run_micro(self):
         cb = lambda inp, frames, time, stat: self.callback(inp, frames, time, stat)
