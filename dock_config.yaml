@@ -1,0 +1,39 @@
+# eduroam
+# host:172.20.96.235
+# ibis
+# host:10.144.88.214
+# ADRZ
+# host:10.42.1.43
+# DFKI
+# host:172.16.100.220
+# docker compose
+# host:asr
+
+# websocket uri of kaldi/vosk server
+uri: "ws://asr:2700/"
+# adaptation_state_infile="state"
+# adaptation_state_outfile="state"
+
+# Address of MQTT broker
+# docker compose: mqtt_address: mqtt-broker
+mqtt_address: mqtt-broker
+
+# Audio parameter
+# Sennheiser PC 8
+#channels: 1
+#use_channel: 0
+sample_rate: 44100
+device: 7
+
+# ReSpeaker V2
+# channels: 6
+# use_channel: 0
+# device: 10
+# sample_rate: 16000
+
+asr_sample_rate: 8000
+#system default: default
+
+#device: default
+#device: pulse
+#device: plughw:1

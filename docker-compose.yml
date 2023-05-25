@@ -1,0 +1,52 @@
+# Docker compose file used to load the broker, ASR, and dialogue_manager
+# TTS still to do
+version: "3"
+
+networks:
+  asrmqtt:
+    driver: bridge
+
+services:
+  broker:
+    image: 'eclipse-mosquitto:2.0.15'
+    networks:
+      - asrmqtt
+    restart: always
+    container_name: 'mqtt-broker'
+    hostname: 'mqtt-broker'
+    ports:
+      - '1883:1883'
+      - '9001:9001'
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  asr:
+    image: 'alphacep/kaldi-de:latest'
+    container_name: 'kaldi_asr'
+    hostname: "asr"
+    networks:
+      - asrmqtt
+    ports:
+      - '2700:2700'
+
+  asr_micro:
+    depends_on:
+      - broker
+      - asr
+    image: 'vosk_asr'
+    container_name: 'asr_micro'
+    networks:
+      - asrmqtt
+    restart: always
+    volumes:
+      - ./user_config.yaml:/app/user_config.yaml:ro
+      - /etc/alsa:/etc/alsa
+      - /usr/share/alsa:/usr/share/alsa
+      - "/run/user/${UID}/pulse/native:/run/user/${UID}/pulse/native"
+      - "${PWD}/audio:/app/audio"
+      - "${PWD}/user_config.yaml:/app/user_config.yaml"
+    group_add:
+      - "${AUDIO_GID}"
+    user: "${UID}"
+    devices:
+      - "/dev/snd:/dev/snd"

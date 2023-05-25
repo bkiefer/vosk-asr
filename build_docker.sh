@@ -1,1 +1,1 @@
-docker build --network="host" -f Dockerfile -t drz_vosk_asr --build-arg USERID=$(id -u) .
+docker build --network="host" -f Dockerfile -t vosk_asr --build-arg USERID=$(id -u) .

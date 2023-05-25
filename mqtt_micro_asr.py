@@ -26,34 +26,37 @@ def current_milli_time():
     return round(time.time() * 1000)
 
 class VoskMicroServer():
-    pid="voskasr"
-    audio_dir="audio/"
+    pid = "voskasr"
+    audio_dir = "audio/"
 
-    channels=1
-    usedchannel=1
-    sample_rate=0
-    asr_sample_rate=16000
+    channels = 1
+    usedchannel = 0
+    sample_rate = 0
+    asr_sample_rate = 16000
 
-    client=None
-    loop=None
-    audio_queue=None
+    client = None
+    loop = None
+    audio_queue = None
 
     def __init__(self, config):
         self.config = config
         self.sample_rate = config['sample_rate']
         if 'asr_sample_rate' in config:
             self.asr_sample_rate = config['asr_sample_rate']
+        if 'channels' in config:
+            self.channels = config['channels']
+        if 'use_channel' in config:
+            self.usedchannel = config['use_channel']
         if 'audio_dir' in config:
-            audio_dir = config['audio_dir']
-
+            self.audio_dir = config['audio_dir']
         self.loop = asyncio.get_running_loop()
         self.audio_queue = asyncio.Queue()
         self.__init_mqtt_client()
 
     def __init_mqtt_client(self):
         self.client = mqtt.Client()
-        #self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
-        #self.client.on_connect = self.__on_mqtt_connect
+        # self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
+        # self.client.on_connect = self.__on_mqtt_connect
 
     def wav_filename(self):
         return self.audio_dir + 'chunk-%d.wav' % (time.time())
@@ -91,20 +94,24 @@ class VoskMicroServer():
 
         frame = np.frombuffer(audio, dtype=np.int16)
         if channels > 1:
-            chans = []
-            for i in range(0, channels - 1):
-                chans.append(frame[i::channels])
+            frame = frame[self.usedchannel::channels]
+            # first attempt
+            #chans = []
+            #for i in range(0, channels - 1):
+            #    chans.append(frame[i::channels])
+            # numpy slicing:
+            # take every i'th value: frame[start:stop:step]
             # channels on separate axes
-            frame = np.stack(chans, axis=0)
-            #print(frame.shape)
-            frame = frame[self.usedchannel]
-            #print(frame)
+            # why? we're only taking one channel anyway for ASR!
+            #frame = np.stack(chans, axis=0)
+        #print(frame[:64])
         if sample_rate != self.asr_sample_rate:
             frame = resampy.resample(frame, sample_rate, self.asr_sample_rate)
+            frame = frame.astype(np.int16)
         self.am.writeframes(frame)
         return frame.tobytes()
 
-    def callback(self, indata, frames, time, status):
+    def callback(self, indata, frames, time_block, status):
         """This is called (from a separate thread) for each audio block."""
         self.loop.call_soon_threadsafe(self.audio_queue.put_nowait,
                                        bytes(indata))
@@ -154,7 +161,6 @@ class VoskMicroServer():
             self.check_result(result)
 
     async def send_files(self, files):
-        self.usedchannel = self.config['use_channel']
         with self.open_asrmon_file(self.asrmon_filename()) as self.am:
             try:
                 print("Connecting to MQTT broker")
@@ -169,16 +175,18 @@ class VoskMicroServer():
     async def run_loop(self):
         print("Opening ASR websocket %s" % (self.config['uri']))
         async with websockets.connect(self.config['uri']) as websocket:
+            #print("****************** Connected ******************")
             await websocket.send('{ "config" : { "sample_rate" : %d } }'
                                  % (self.asr_sample_rate))
             while True:
                 data = await self.audio_queue.get()
                 self.writeframes(data)
-                #print(data)
+                #print(len(data))
 
                 data = self.resample(data, self.channels, self.sample_rate)
+                print('<', end='', flush=True)
                 await websocket.send(data)
-                #print('.', end='')
+                print('>', end='', flush=True)
                 result = await websocket.recv()
                 self.check_result(result)
 
@@ -188,9 +196,6 @@ class VoskMicroServer():
 
     async def run_micro(self):
         cb = lambda inp, frames, time, stat: self.callback(inp, frames, time, stat)
-        self.sample_rate = self.config['sample_rate']
-        self.channels = self.config['channels']
-        self.usedchannel = self.config['use_channel']
         print("Connecting to audio input %s (%d, %d, %d)"
               % (self.config['device'],
                  self.sample_rate, self.channels, self.usedchannel))
@@ -216,8 +221,8 @@ async def main(args):
         sys.stderr.write('Usage: %s <config.yaml> [audio_file(s)]\n' % args[0])
         sys.exit(1)
 
+    print(sd.query_devices())
     if args[0] == "-p":
-        print(sd.query_devices())
         return
 
     config = None
