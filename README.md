@@ -16,6 +16,8 @@ Make sure no other MQTT broker is running and using port 2700. This uses the con
 
 # Running locally for debugging or development
 
+*DO NOT DO THIS IN A CONDA OR VIRTUAL ENVIRONMENT, THE PYTHON BINARY HAS TO BE THAT OF YOUR NATIVE OS INSTALLATION*
+
 `pip install` the packages in `requirements.txt`
 
 Start MQTT broker and vosk kaldi server, if necessary, with `./run_support.sh`

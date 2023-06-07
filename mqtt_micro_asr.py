@@ -33,6 +33,7 @@ def current_milli_time():
 class VoskMicroServer():
     pid = "voskasr"
     audio_dir = "audio/"
+    language = None
 
     channels = 1
     usedchannel = 0
@@ -55,6 +56,11 @@ class VoskMicroServer():
             self.usedchannel = config['use_channel']
         if 'audio_dir' in config:
             self.audio_dir = config['audio_dir']
+        if 'language' in config:
+            self.language = config['language']
+        self.topic = self.pid + '/asrresult'
+        if self.language:
+            self.topic += '/' + language
         self.loop = asyncio.get_running_loop()
         self.audio_queue = asyncio.Queue()
         self.__init_mqtt_client()
