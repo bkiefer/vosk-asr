@@ -46,8 +46,9 @@ class VoskMicroServer():
 
     def __init__(self, config):
         self.config = config
-        if 'sample_rate' in config:
-            self.sample_rate = config['sample_rate']
+        # The right sample rate has to be set in the gststreamer module
+        #if 'sample_rate' in config:
+        #    self.sample_rate = config['sample_rate']
         if 'asr_sample_rate' in config:
             self.asr_sample_rate = config['asr_sample_rate']
         if 'channels' in config:
@@ -60,7 +61,7 @@ class VoskMicroServer():
             self.language = config['language']
         self.topic = self.pid + '/asrresult'
         if self.language:
-            self.topic += '/' + language
+            self.topic += '/' + self.language
         self.loop = asyncio.get_running_loop()
         self.audio_queue = asyncio.Queue()
         self.__init_mqtt_client()
@@ -139,8 +140,7 @@ class VoskMicroServer():
                 # enough?
                 data['id'] = current_milli_time()
                 print(data)
-                self.client.publish(self.pid + '/asrresult',
-                                    json.dumps(data, indent=None))
+                self.client.publish(self.topic, json.dumps(data, indent=None))
 
     # Send audio from file to ASR
     async def send_audio(self, file):

@@ -20,11 +20,13 @@ Make sure no other MQTT broker is running and using port 2700. This uses the con
 
 `pip install` the packages in `requirements.txt`
 
+Install python bindings for the gstreamer libraries
+
+`sudo apt install python3-gst-1.0`
+
 Start MQTT broker and vosk kaldi server, if necessary, with `./run_support.sh`
 
-Now either build the docker, and start it in interactive mode with `run_docker.sh`. To start the client, you can use the `startclient.sh` script in the docker environment. This uses the `local_config.yaml` file.
-
-Or start it locally, with (the default configuration should work)
+Start ASR locally, with (the default configuration should work)
 ```
 python mqtt_micro_asr.py
 ```

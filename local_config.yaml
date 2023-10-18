@@ -9,6 +9,11 @@
 # docker compose
 # host:asr
 
+# What's the language of the ASR model (if any, is optional)
+# the language, if set, will be appended to the publishing topic like this:
+#/voskasr/asrresult/<lang>
+language: de
+
 # websocket uri of kaldi/vosk server
 uri: "ws://0.0.0.0:2700/"
 # adaptation_state_infile="state"

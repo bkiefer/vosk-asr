@@ -1,6 +1,6 @@
 pyyaml>=6.0
 resampy>=0.4.2
 numpy>=1.21
-websockets
+websockets>=11.0
 paho-mqtt>=1.6
 PyGObject>=3.42.1
