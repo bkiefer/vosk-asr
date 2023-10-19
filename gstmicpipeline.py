@@ -19,11 +19,13 @@ from gi.repository import Gst, GstApp, GLib
 #PIPELINE1 = """pulsesrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate=16000 ! queue ! appsink sync=true max-buffers=1 drop=true name=sink emit-signals=true"""
 
 # For ReSpeaker, picks up result channel of demo mode (channel 0)
-# Output is already in format audio/x-raw,format=S16LE,channels=1,rate=16000
-PIPELINE_RESPEAKER="""alsasrc device="hw:4" ! deinterleave name=d d.src_0 ! appsink name=sink emit-signals=true"""
+# Output is in format audio/x-raw,format=S16LE,channels=6,rate=16000
+PIPELINE_RESPEAKER="""pulsesrc device=5 ! audio/x-raw,format=S16LE,channels=6,rate=16000 ! deinterleave name=d d.src_0 ! appsink name=sink emit-signals=true"""
 
-# For, e.g., Sennheiser headset
+# For, e.g., Sennheiser headset (stereo, 44100Hz)
 PIPELINE = """pulsesrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate=16000 ! appsink name=sink emit-signals=true"""
+
+PIPELINE=PIPELINE_RESPEAKER
 
 class GstreamerMicroSink(object):
 

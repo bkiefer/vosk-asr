@@ -218,7 +218,9 @@ class VoskMicroServer():
 
     async def run_micro(self):
         cb = lambda inp, frames: self.callback(inp, frames, None, None)
-        with gm.GstreamerMicroSink(callback=cb) as device:
+        pipeline = self.config["pipeline"] if "pipeline" in self.config \
+            else gm.PIPELINE
+        with gm.GstreamerMicroSink(callback=cb, pipeline=pipeline) as device:
             with self.open_wave_file(self.wav_filename()) as self.wf:
                 with self.open_asrmon_file(self.asrmon_filename()) as self.am:
                     print("Connecting to MQTT broker")
