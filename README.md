@@ -5,7 +5,8 @@
 Install python bindings for the gstreamer libraries
 
 ```
-sudo apt install libgirepository1.0-dev python3-gst-1.0 libcairo2-dev
+sudo apt install libgirepository1.0-dev python3-gst-1.0 libcairo2-dev python3-pip
+
 
 pip install -r requirements.txt
 ```
