@@ -13,14 +13,14 @@ mqtt_address: localhost
 
 # device: Sennheiser USB headset, if it's the OS default device
 # This pipeline does the right conversion already
-#pipeline: "pulsesrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate=16000 ! appsink name=sink emit-signals=true"
+#pipeline: "pulsesrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate={} ! appsink name=sink emit-signals=true"
 
 # ReSpeaker V2, the device number can be found calling the following command
 # pacmd list-sources | grep -e 'index:' -e device.string -e 'name:'
 # It's the multichannel device!
 #channels: 6, used channel: 0 (combo channel), sample_rate: 16000
 # This pipeline does the right things already
-pipeline: "pulsesrc device=5 ! audio/x-raw,format=S16LE,channels=6,rate=16000 ! deinterleave name=d d.src_0 ! appsink name=sink emit-signals=true"
+pipeline: "pulsesrc device=5 ! audio/x-raw,format=S16LE,channels=6,rate={} ! deinterleave name=d d.src_0 ! appsink name=sink emit-signals=true"
 
 # sample rate of the ASR model (currently 8k)
 asr_sample_rate: 8000

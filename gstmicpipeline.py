@@ -20,12 +20,13 @@ from gi.repository import Gst, GstApp, GLib
 
 # For ReSpeaker, picks up result channel of demo mode (channel 0)
 # Output is in format audio/x-raw,format=S16LE,channels=6,rate=16000
-PIPELINE_RESPEAKER="""pulsesrc device=5 ! audio/x-raw,format=S16LE,channels=6,rate=16000 ! deinterleave name=d d.src_0 ! appsink name=sink emit-signals=true"""
+PIPELINE_RESPEAKER="""pulsesrc device=5 ! audio/x-raw,format=S16LE,channels=6,rate={} ! deinterleave name=d d.src_0 ! appsink name=sink emit-signals=true"""
 
 # For, e.g., Sennheiser headset (stereo, 44100Hz)
-PIPELINE = """pulsesrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate=16000 ! appsink name=sink emit-signals=true"""
+PIPELINE_PULSE = """pulsesrc ! audioconvert ! audio/x-raw,format=S16LE,channels=1,rate={} ! appsink name=sink emit-signals=true"""
 
 PIPELINE=PIPELINE_RESPEAKER
+#PIPELINE=PIPELINE_PULSE
 
 class GstreamerMicroSink(object):
 
@@ -39,10 +40,10 @@ class GstreamerMicroSink(object):
         buffer.unmap(map_info)
         return False
 
-    def __init__(self, callback=lambda buffer: True, pipeline=PIPELINE):
+    def __init__(self, callback=lambda buffer: True, pipeline_spec=PIPELINE, rate=16000):
         Gst.init(None)
         self.main_loop = GLib.MainLoop()
-        self.pipeline = Gst.parse_launch(pipeline)
+        self.pipeline = Gst.parse_launch(pipeline_spec.format(rate))
         self.appsink = self.pipeline.get_by_name("sink")
         self.callback = callback
         cb = lambda appsink: self.on_new_sample(appsink)

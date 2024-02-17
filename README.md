@@ -13,7 +13,13 @@ pip install -r requirements.txt
 
 Start MQTT broker and vosk kaldi server with `./run_support.sh`
 
-Start ASR locally, maybe you have to adapt the pipeline in `local_de_config.yaml`
+Start ASR locally, maybe you have to adapt the pipeline in `local_de_config.yaml`, or the language, the current default expects a ReSpeaker as PulseAudio device 5. You can check your local audio device configuration with
+
+```
+pacmd list-sources | grep -e 'index:' -e device.string -e 'name:'
+```
+
+Check the content of gstmicpipeline.py in case of problems. In the audio directory, the microphone audio is stored in asrmon-XX.wav files and the data transferred to the ASR in chunk-XX.wav
 
 ```
 python mqtt_micro_asr.py local_de_config.yaml
